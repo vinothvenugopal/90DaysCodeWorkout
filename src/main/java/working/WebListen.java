@@ -11,7 +11,7 @@ import org.openqa.selenium.support.events.WebDriverEventListener;
 
 public class WebListen implements WebDriverEventListener {
 	EventFiringWebDriver event1;
-
+	// constructor for initializing the EventfiringWebDriver for this class
 	public WebListen(EventFiringWebDriver event1) {
 		this.event1 = event1;
 	}
@@ -102,9 +102,11 @@ public class WebListen implements WebDriverEventListener {
 		
 	}
 
+	//executes the code before every click action
 	@Override
 	public void beforeClickOn(WebElement element, WebDriver driver) {
-		// TODO Auto-generated method stub
+		// checking if the pop up element is present using the element.size.
+		//if size > 0, then the element is present		
 		if(driver.findElements(By.xpath("//div[@class='inside_notify_content']")).size()>0)
 		{
 			WebElement popUp = driver.findElement(By.xpath("//div[@class='inside_notify_content']"));
