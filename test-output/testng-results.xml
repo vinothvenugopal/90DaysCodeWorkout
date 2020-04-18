@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" ignored="0" total="1" passed="1">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Default suite" duration-ms="77069" started-at="2020-04-18T07:32:20Z" finished-at="2020-04-18T07:33:37Z">
+    <groups>
+    </groups>
+    <test name="Default test" duration-ms="77069" started-at="2020-04-18T07:32:20Z" finished-at="2020-04-18T07:33:37Z">
+      <class name="working.Day4_HPStore_PopUpHandled">
+        <test-method status="PASS" signature="laptopOrder()[pri:0, instance:working.Day4_HPStore_PopUpHandled@239963d8]" name="laptopOrder" duration-ms="76981" started-at="2020-04-18T07:32:20Z" finished-at="2020-04-18T07:33:37Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- laptopOrder -->
+      </class> <!-- working.Day4_HPStore_PopUpHandled -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>
