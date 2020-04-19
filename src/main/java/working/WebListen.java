@@ -102,7 +102,7 @@ public class WebListen implements WebDriverEventListener {
 		
 	}
 
-	//executes the code before every click action
+	//executes the code before every click action written in the class to perform in the browser
 	@Override
 	public void beforeClickOn(WebElement element, WebDriver driver) {
 		// checking if the pop up element is present using the element.size.
