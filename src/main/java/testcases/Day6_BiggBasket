@@ -1,0 +1,191 @@
+package testcases;
+import static org.testng.Assert.expectThrows;
+
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+public class Day6_BiggBasket {
+	public static ChromeDriver driver;
+	public static void main(String[] args) throws InterruptedException 
+	{
+		System.setProperty("webdriver.chrome.driver", "./newdriver/chromedriver.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
+		driver = new ChromeDriver();
+		System.out.println("Browser Launched");
+		Actions action = new Actions(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		JavascriptExecutor js =  (JavascriptExecutor) driver;
+		driver.manage().window().maximize();
+		System.out.println("Browser Maximized");
+
+		//1) Go to https://www.bigbasket.com/
+		driver.get("https://www.bigbasket.com/");
+		System.out.println("URL Loaded");
+
+		//2) mouse over on  Shop by Category 
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//li[@class='dropdown full-wid hvr-drop']")));
+		action.moveToElement(driver.findElementByXPath("//li[@class='dropdown full-wid hvr-drop']")).build().perform();
+
+		//3)Go to FOODGRAINS, OIL & MASALA --> RICE & RICE PRODUCTS 
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//a[text()='Foodgrains, Oil & Masala'])[2]")));
+		action.moveToElement(driver.findElementByXPath("(//a[text()='Foodgrains, Oil & Masala'])[2]")).build().perform();
+		System.out.println("Foodgrains, Oil & Masala clicked");
+
+		//4) Click on Boiled & Steam Rice
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//li[@class='ng-scope']//a[text()='Rice & Rice Products'])[2]")));
+		action.moveToElement(driver.findElementByXPath("(//li[@class='ng-scope']//a[text()='Rice & Rice Products'])[2]")).click().build().perform();
+		System.out.println("Boiled and Steam Rice Clicked");
+
+		//5) Choose the Brand as bb Royal
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//div[@class='col-xs-12 checkbox ng-scope']//span[text()='bb Royal'])[1]")));
+		driver.findElementByXPath("(//div[@class='col-xs-12 checkbox ng-scope']//span[text()='bb Royal'])[1]").click();
+		System.out.println("Brand - BB Royal clicked");
+
+		//6) Go to Ponni Boiled Rice - Super Premium and select 5kg bag from Dropdown
+		js.executeScript("window.scrollBy(0, 500)");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='Ponni Boiled Rice - Super Premium']")));
+		String productName = driver.findElementByXPath("//a[text()='Ponni Boiled Rice - Super Premium']").getText();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//a[text()='Ponni Boiled Rice - Super Premium']/parent::div/following-sibling::div//i)[1]")));
+		//WebElement ele = driver.findElement(By.xpath("(//a[text()='Ponni Boiled Rice - Super Premium']/parent::div/following-sibling::div//i)[1]"));
+		WebElement ele = driver.findElement(By.xpath("(//a[text()='Ponni Boiled Rice - Super Premium']/parent::div/following-sibling::div//i)[1]"));
+		//action.moveToElement(driver.findElementByXPath("(//a[text()='Ponni Boiled Rice - Super Premium']/parent::div/following-sibling::div//i)[1]")).click().build().perform();
+		js.executeScript("arguments[0].click()", ele);
+		Thread.sleep(2000);
+		driver.findElementByXPath("(//a[text()='Ponni Boiled Rice - Super Premium']/parent::div/following-sibling::div//span[text()='5 kg'])").click();
+		System.out.println("Ponni Boiled Rice - Super Premium clicked");
+
+		//7) print the price of Rice
+		String originalPrice = driver.findElementByXPath("(//a[text()='Ponni Boiled Rice - Super Premium']/parent::div/following-sibling::div[2]//h4//span[@class='ng-binding'])[1]").getText();
+		System.out.println("Original Price of "+productName+" is "+originalPrice);
+		String discountPrice = driver.findElementByXPath("(//a[text()='Ponni Boiled Rice - Super Premium']/parent::div/following-sibling::div[2]//h4//span[@class='ng-binding'])[2]").getText();
+		System.out.println("And the Discounted Price is "+discountPrice);
+
+		//8) Click Add button
+		driver.findElementByXPath("(//a[text()='Ponni Boiled Rice - Super Premium']/ancestor::div[@class='ng-scope'][1]//div[@class='delivery-opt']//button)[1]").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//a[text()='Continue'])[1]")));
+		driver.findElementByXPath("(//a[text()='Continue'])[1]").click();
+
+		//9) Verify the success message displayed 
+		//		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[text()='Successfully added Ponni Boiled Rice - Super Premium 5 kg to the basket']")));
+		//		String message = driver.findElementByXPath("//div[text()='Successfully added Ponni Boiled Rice - Super Premium 5 kg to the basket']").getText();
+		//		System.out.println(message+" displayed successfully");
+
+		//10) Type Dal in Search field and enter
+		driver.findElementById("input").sendKeys("Dal", Keys.ENTER);
+		System.out.println("Dal entered in search box and search initiated");
+
+		//12) Go to Toor/Arhar Dal and select 2kg & set Qty 2 
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='toor dal']")));
+		driver.findElementByXPath("//a[text()='toor dal']").click();
+		System.out.println("Clicked Toor dal");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']")));
+		productName = driver.findElementByXPath("//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']").getText();
+		driver.findElementByXPath("(//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']/parent::div/following-sibling::div//i)[1]").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']/parent::div/following-sibling::div//span[contains(text(),'2 kg')])")));
+		driver.findElementByXPath("(//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']/parent::div/following-sibling::div//span[contains(text(),'2 kg')])").click();
+		System.out.println("Toor Dal - 2kg pack selected successfully");
+		driver.findElementByXPath("//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']/parent::div/following-sibling::div//input[@ng-model='vm.startQuantity']").clear();
+		driver.findElementByXPath("//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']/parent::div/following-sibling::div//input[@ng-model='vm.startQuantity']").sendKeys("2");
+		System.out.println("Desired quantity is updated to 2");
+
+		//13) Print the price of Dal
+		String dalOriginalPrice = driver.findElementByXPath("(//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']/parent::div/following-sibling::div//h4//span)[2]").getText();
+		System.out.println("Original Price of "+productName+" is "+dalOriginalPrice);
+		String dalDiscountPrice = driver.findElementByXPath("(//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']/parent::div/following-sibling::div//h4//span)[3]").getText();
+		System.out.println("And the discounted price is "+dalDiscountPrice);
+
+		//14) Click Add button
+		driver.findElementByXPath("(//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']/ancestor::div[@class='ng-scope'][1]//div[@class='delivery-opt']//button)[1]").click();
+		System.out.println("Item added to the basket successfully");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@role='button']/following-sibling::div[1]")));
+		String message = driver.findElementByXPath("//button[@role='button']/following-sibling::div[1]").getText();
+		System.out.println(message+" displayed successfuly");
+		driver.findElementByXPath("(//button[text()='×'])[5]").click();
+
+		//15) Mouse hover on My Basket 
+		action.moveToElement(driver.findElementByXPath("//span[@class='basket-content']")).click().build().perform();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='product-qty ng-binding']")));
+		Day6_BiggBasket bigBasket = new Day6_BiggBasket();
+		boolean subTotalCheck = bigBasket.subTotalCalc();
+		if(subTotalCheck == true)
+		{
+			System.out.println('\n'+"SubTotal Matches with the total item quantity and its price");
+		}
+		else
+		{
+			System.out.println('\n'+"SubTotal displayed is not in line with the item quantity and price");
+		}
+
+		//17) Reduce the Quantity of Dal as 1 
+		action.moveToElement(driver.findElementByXPath("//span[@class='basket-content']")).build().perform();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='bb Popular Toor/Arhar Dal 2 kg Pouch']/ancestor::li[@class='ng-scope']//button[@qa='decQtyMB']")));
+		driver.findElementByXPath("//a[text()='bb Popular Toor/Arhar Dal 2 kg Pouch']/ancestor::li[@class='ng-scope']//button[@qa='decQtyMB']").click();
+		System.out.println("Quantity of Item "+driver.findElementByXPath("//a[text()='bb Popular Toor/Arhar Dal 2 kg Pouch']").getText()+" is reduced."+'\n'+"Recalculating the subtotal");
+		Thread.sleep(2000);
+		subTotalCheck = bigBasket.subTotalCalc();
+		if(subTotalCheck == true)
+		{
+			System.out.println('\n'+"SubTotal Matches with the total item quantity and its price");
+		}
+		else
+		{
+			System.out.println('\n'+"SubTotal displayed is not in line with the item quantity and price");
+		}
+		driver.close();
+	}
+	public boolean subTotalCalc()
+	{
+		boolean isTotalCorrect = false;
+		int qty=0, price=0, subTotal = 0, subTotalCheck = 0;
+		String strQty, strPrice;
+
+		//getting the product names available in the basket
+		List<WebElement> basketProductName = driver.findElementsByXPath("//a[@qa='prodNameMB']");
+
+		//getting the quantity of the added items (which will be in the format 1 x 336.00
+		List<WebElement> qtyOfItems = driver.findElementsByXPath("//div[@class='product-qty ng-binding']");
+		//getting the price of the added to the basket (which will be in the format 774.00)
+		List<WebElement> priceOfEachItem = driver.findElementsByXPath("//div[@class='row mrp']//span");
+		//getting the subtotal value.
+		String strSubTotal = driver.findElementByXPath("//span[@ng-bind='vm.cart.cart_total']").getText();
+		strSubTotal = strSubTotal.substring(0, strSubTotal.length()-3);
+		subTotal = Integer.parseInt(strSubTotal);
+		//runs for the total number of items added to the basket
+		for (int i = 0; i < qtyOfItems.size(); i++) 
+		{
+			System.out.println('\n'+"Price and quantity check for item: "+(i+1)+": "+'\n'+basketProductName.get(i).getText());
+			strQty = qtyOfItems.get(i).getText();
+			strQty = strQty.substring(0, 1);
+			System.out.println('\n'+"Item Quantity: "+strQty);
+			strPrice = priceOfEachItem.get(i).getText();
+			strPrice = strPrice.substring(0, strPrice.length()-3);
+			System.out.println('\n'+"Price: "+strPrice);
+			qty = Integer.parseInt(strQty);
+			price = Integer.parseInt(strPrice);
+			subTotalCheck = subTotalCheck+(qty*price);
+		}
+		System.out.println('\n'+"SubTotal of all the items: "+subTotal);
+
+		if(subTotal == subTotalCheck)
+		{
+			isTotalCorrect = true;
+		}
+		else
+		{
+			isTotalCorrect = false;
+		}
+		return isTotalCorrect;
+	}
+
+}
