@@ -144,6 +144,8 @@ public class Day6_BiggBasket {
 		}
 		driver.close();
 	}
+	
+	//Method to check if the item quantity + price == subtotal
 	public boolean subTotalCalc()
 	{
 		boolean isTotalCorrect = false;
