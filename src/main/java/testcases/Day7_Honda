@@ -1,0 +1,165 @@
+package testcases;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.Test;
+
+public class Day7_Honda {
+
+	@Test
+	public void getPriceList() throws InterruptedException {
+
+		System.setProperty("webdriver.chrome.driver", "./newdriver/chromedriver.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+		ChromeDriver driver = new ChromeDriver();
+		System.out.println("Browser Launched");
+		Actions action = new Actions(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		driver.manage().window().maximize();
+		System.out.println("Browser Maximized");
+
+		//1) Go to https://www.honda2wheelersindia.com/
+		driver.get("https://www.honda2wheelersindia.com/");
+		System.out.println("URL Loaded successfully");
+		driver.findElementByXPath("//button[@class='close']").click();
+
+		//2) Click on scooters and click dio
+		driver.findElementById("link_Scooter").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//div[@class='owl-item'])[4]")));
+		driver.findElementByXPath("(//div[@class='owl-item'])[4]").click();
+
+		//3) Click on Specifications and mouseover on ENGINE
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='Specifications']")));
+		driver.findElementByXPath("//a[text()='Specifications']").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='ENGINE']")));
+		driver.findElementByXPath("//a[text()='ENGINE']").click();
+
+		//4) Get Displacement value
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//ul[@class='tab_content']//span[text()='Displacement']/following-sibling::span")));
+		String dioDisp = driver.findElementByXPath("//ul[@class='tab_content']//span[text()='Displacement']/following-sibling::span").getText();
+		dioDisp = dioDisp.replaceAll("[^0-9\\s.]+|\\.(?!\\d)", "");
+		double intDioDisp = Double.parseDouble(dioDisp);
+
+
+		//5) Go to Scooters and click Activa 125
+		driver.findElementById("link_Scooter").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//div[@class='owl-item'])[6]")));
+		driver.findElementByXPath("(//div[@class='owl-item'])[6]").click();
+
+
+		//6) Click on Specifications and mouseover on ENGINE
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='Specifications']")));
+		driver.findElementByXPath("//a[text()='Specifications']").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='ENGINE']")));
+		driver.findElementByXPath("//a[text()='ENGINE']").click();
+
+		//7) Get Displacement value
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//ul[@class='tab_content']//span[text()='Displacement']/following-sibling::span")));
+		Thread.sleep(1000);
+		String actDisp = driver.findElementByXPath("//ul[@class='tab_content']//span[text()='Displacement']/following-sibling::span").getText();
+		actDisp = actDisp.replaceAll("[^0-9\\s.]+|\\.(?!\\d)", "");
+		double intActDisp = Double.parseDouble(actDisp);
+
+		//8) Compare Displacement of Dio and Activa 125 and print the Scooter name having better Displacement.
+		System.out.println("Displacement of Dio: "+ intDioDisp+'\n'+"Displacement of Activa 125: "+intActDisp);
+		String betterVechicle;
+		if(intDioDisp < intActDisp)
+		{
+			System.out.println("Activa has the better displacement");
+			betterVechicle = "Activa 125 BS-VI";
+		}
+		else
+		{
+			System.out.println("Dio has the better displacement");
+			betterVechicle = "Dio BS-VI";
+		}
+
+		//9) Click FAQ from Menu 
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//a[text()='FAQ'])[1]")));
+		driver.findElementByXPath("(//a[text()='FAQ'])[1]").click();
+		
+		//10) Click Activa 125 BS-VI under Browse By Product
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='"+betterVechicle+"']")));
+		driver.findElementByXPath("//a[text()='"+betterVechicle+"']").click();
+
+		//11) Click  Vehicle Price 
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@href='#6a']")));
+		driver.findElementByXPath("//a[@href='#6a']").click();
+
+		//12) Make sure Activa 125 BS-VI selected and click submit
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//select[@name='ModelID'])[6]")));
+		WebElement model = driver.findElementByXPath("(//select[@name='ModelID'])[6]");
+		Select modelDD = new Select(model);
+		WebElement firstSelectedOption = modelDD.getFirstSelectedOption();
+		String modelName = firstSelectedOption.getText();
+		if(modelName.equals(betterVechicle))
+		{
+			System.out.println("Scooter Model "+modelName+" is selected by default"+'\n');
+		}
+		else
+		{
+			System.out.println("Scooter Model is different than the one selected before");
+		}
+		driver.findElementById("submit6").click();
+
+
+		//13) click the price link
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//table[@id='tblPriceMasterFilters']//td//a")));
+		driver.findElementByXPath("//table[@id='tblPriceMasterFilters']//td//a").click();
+
+
+		//14)  Go to the new Window and select the state as Tamil Nadu and  city as Chennai
+		Set<String> windowHandles = driver.getWindowHandles();
+		List<String> windowHandlesList = new ArrayList<String>(windowHandles);
+		driver.switchTo().window(windowHandlesList.get(1));
+		//// select State
+		WebElement stateEle = driver.findElementById("StateID");
+		Select stateDD = new Select(stateEle);
+		stateDD.selectByVisibleText("Tamil Nadu");
+
+		////Select City
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("CityID")));
+		WebElement cityEle = driver.findElementById("CityID");
+		Select cityDD = new Select(cityEle);
+		cityDD.selectByVisibleText("Chennai");
+
+		//15) Click Search
+		driver.findElementByXPath("//button[text()='Search']").click();
+
+		//16)Print all the 3 models and their prices
+		Thread.sleep(1000);
+		List<WebElement> tableTR = driver.findElementsByXPath("//table[@id='gvshow']//tr");
+		List<WebElement> tableTD = driver.findElementsByXPath("//table[@id='gvshow']//tr[2]//td");
+		String tdText;
+		System.out.println("Please find all "+betterVechicle+" models and their price below"+'\n'+"*************************************************************");
+		for (int i = 1; i < tableTR.size()-1; i++) 
+		{
+			for (int j = 1; j <= tableTD.size(); j++) 
+			{
+				if(i==1)
+				{
+		              //for <tr>[1] alone there are 3 <td>. so selecting from the 2nd td for tr[1] alone
+					 tdText = driver.findElementByXPath("//table[@id='gvshow']//tr["+i+"]//td["+(j+1)+"]").getText();
+				}
+				else
+				{
+					 tdText = driver.findElementByXPath("//table[@id='gvshow']//tr["+i+"]//td["+j+"]").getText();
+				}
+				System.out.print(tdText+'\t');
+			}
+			System.out.println('\n');
+		}
+	    //17) Close the Browser
+		driver.quit();
+	}
+
+}
