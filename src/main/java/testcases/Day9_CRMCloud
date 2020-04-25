@@ -21,6 +21,7 @@ import working.TestRetry;
 
 public class Day9_CRMCloud {
 
+	//TestRetry.class is in src/main/java/working (working->package name)
 	@Test(dataProvider = "leadData", retryAnalyzer = TestRetry.class)
 	public void crmCloudMethod(String[] data) throws InterruptedException
 	{
@@ -198,6 +199,7 @@ public class Day9_CRMCloud {
 				System.out.println("Meeting is not found under Activities");
 			}
 		}
+		driver.close();
 	}
 	
 	@DataProvider(name = "leadData")
