@@ -1,0 +1,221 @@
+package testcases;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import working.TestRetry;
+
+public class Day9_CRMCloud {
+
+	@Test(dataProvider = "leadData", retryAnalyzer = TestRetry.class)
+	public void crmCloudMethod(String[] data) throws InterruptedException
+	{
+		System.setProperty("webdriver.chrome.driver", "./newdriver/chromedriver.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+		ChromeDriver driver = new ChromeDriver();
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		Actions action = new Actions(driver);
+		
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		//gets current date and converts the date object to string and getting only the date portion using subString
+		String thisDate = LocalDate.now().toString().substring(8,10);
+		int nextDay = Integer.parseInt(thisDate)+1;
+
+		System.out.println("Browser Launched");
+		driver.manage().window().maximize();
+		System.out.println("Browser Maximized");
+
+		//1) Go to https://demo.1crmcloud.com/
+		driver.get("https://demo.1crmcloud.com/");
+		System.out.println("URL Loaded");
+
+		//2) Give username as admin and password as admin
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("login_user")));
+		driver.findElementById("login_user").sendKeys("admin");
+		System.out.println("User Name Entered");
+		driver.findElementById("login_pass").sendKeys("admin");
+		System.out.println("Password Entered");
+
+		//3) Choose theme as Claro Theme
+		WebElement loginThemeEle = driver.findElementById("login_theme");
+		Select loginThemeDD = new Select(loginThemeEle);
+		loginThemeDD.selectByVisibleText("Claro Theme");
+		System.out.println("Claro Theme selected");
+		driver.findElementById("login_button").click();
+		System.out.println("Login button clicked");
+
+		//4) Click on Sales and Marketting 
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Sales & Marketing']")));
+		System.out.println("Login Success");
+		driver.findElementByXPath("//div[text()='Sales & Marketing']").click();
+		System.out.println("Sales & Marketing clicked");
+
+		//5) Click Create contact
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Create Contact']")));
+		driver.findElementByXPath("//div[text()='Create Contact']").click();
+		System.out.println("Create Contact clicked");
+
+		//6) Select Title and type First name, Last Name, Email and Phone Numbers
+		Thread.sleep(4000);
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("DetailFormsalutation-input")));
+		driver.findElementById("DetailFormsalutation-input").click();
+		
+		Thread.sleep(1000);
+		//clicks the appropriate salutation
+		driver.findElementByXPath("//div[text()='"+data[0]+"']").click();
+		driver.findElementById("DetailFormfirst_name-input").sendKeys(data[1]);
+		driver.findElementById("DetailFormlast_name-input").sendKeys(data[2]);
+		driver.findElementById("DetailFormemail1-input").sendKeys(data[3]);
+		driver.findElementById("DetailFormphone_work-input").sendKeys(data[4]);
+
+		//7) Select Lead Source as "Public Relations"
+		driver.findElementById("DetailFormlead_source-input").click();
+		driver.findElementByXPath("//div[text()='"+data[5]+"']").click();
+
+		//8) Select Business Roles as "Sales"
+		driver.findElementById("DetailFormbusiness_role-input").click();
+		driver.findElementByXPath("//div[text()='"+data[6]+"']").click();
+
+		//9) Fill the Primary Address, City, State, Country and Postal Code and click Save
+		driver.findElementById("DetailFormprimary_address_street-input").sendKeys(data[7]);
+		driver.findElementById("DetailFormprimary_address_city-input").sendKeys(data[8]);
+		driver.findElementById("DetailFormprimary_address_state-input").sendKeys(data[9]);
+		driver.findElementById("DetailFormprimary_address_country-input").sendKeys(data[10],Keys.TAB);
+		driver.findElementById("DetailFormprimary_address_postalcode-input").sendKeys(data[11]);
+		driver.findElementById("DetailForm_save2").click();
+		Thread.sleep(2000);
+		
+		//searching if the contact is already available. if yes, contact creating will be cancelled and create meeting
+		//will be processed
+		if(driver.findElementsByXPath("(//span[text()='Save'])[1]").size()>0)
+		{
+			driver.findElementByXPath("//span[text()='Cancel']").click();
+			System.out.println("Contact with the name: "+data[1]+" "+data[2]+" and similar personal details already exists."+'\n'+"Creation could possibly a duplication"+'\n'+"Cancelling Contact Creation and proceeding further with the meeting");
+		}
+		else
+		{
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//h3[contains(text(),'"+data[1]+" "+data[2]+"')]")));
+			if(driver.findElementByXPath("//div[@class='summary-header']//h3").getText().contains(data[1]+" "+data[2]))
+			{
+				System.out.println("Contact  Creation successful");
+			}
+			else
+			{
+				System.out.println("Some issues with contact creation");
+			}
+		}
+		//10) Mouse hover on Today's Activities and click Meetings
+		action.moveToElement(driver.findElementByXPath("//div[contains(text(),'Today')]")).build().perform();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Meetings']")));
+		driver.findElementByXPath("//div[text()='Meetings']").click();
+		System.out.println("Meetings Clicked");
+		
+		
+		//11) Click Create 
+		Thread.sleep(2000);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Create']")));
+		driver.findElementByXPath("//span[text()='Create']").click();
+		System.out.println("Create meeting clicked");
+
+		//12) Type Subject as "Project Status" , Status as "Planned" 
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("DetailFormname-input")));
+		driver.findElementById("DetailFormname-input").sendKeys("Project Status");
+		driver.findElementById("DetailFormstatus-input").click();
+		driver.findElementByXPath("//div[text()='Planned']");
+
+		//13) Start Date & Time as tomorrow 3 pm and Duration as 1hr
+		Thread.sleep(2000);
+		driver.findElementByXPath("//div[@class='uii uii-lg uii-date']").click();
+		if(driver.findElements(By.xpath("//div[text()='"+nextDay+"']")).size()>1)
+		{
+			driver.findElementByXPath("(//div[text()='"+nextDay+"'])[2]").click();
+		}
+		else
+		{
+			driver.findElementByXPath("//div[text()='"+nextDay+"']").click();
+		}
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='popup-search tools-row']//input[@class='input-text']")));
+		driver.findElementByXPath("//div[@class='popup-search tools-row']//input[@class='input-text']").sendKeys("03:00", Keys.ENTER);
+		driver.findElementById("DetailFormduration-time").clear();
+		driver.findElementById("DetailFormduration-time").sendKeys("1",Keys.TAB);
+
+		//14) Click Add paricipants, add your created Contact name and click Save
+		Thread.sleep(2000);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()=' Add Participants']")));
+		driver.findElementByXPath("//span[text()=' Add Participants']").click();
+		System.out.println("Add Participants clicked");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@id='app-search']//input[@class='input-text']")));
+		driver.findElementByXPath("//div[@id='app-search']//input[@class='input-text']").sendKeys(data[1]+" "+data[2], Keys.TAB);
+		System.out.println("Contact Name entered in the search field");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='"+data[1]+" "+data[2]+"']")));
+		driver.findElementByXPath("//div[text()='"+data[1]+" "+data[2]+"']").click();
+		driver.findElementById("DetailForm_save2").click();
+
+		//15) Go to Sales and Marketting-->Contacts
+		action.moveToElement(driver.findElementByXPath("//div[text()='Sales & Marketing']")).build().perform();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Contacts']")));
+		driver.findElementByXPath("//div[text()='Contacts']").click();
+		System.out.println("Sales & Marketing -> Contacts clicked");
+
+
+		//16) search the lead Name and click the name from the result
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("filter_text")));
+		driver.findElementById("filter_text").sendKeys(data[1]+" "+data[2]);
+		System.out.println("Name entered in the search box");
+		Thread.sleep(500);
+		driver.findElementById("filter_text").sendKeys(Keys.ENTER);
+		System.out.println("Search Initiated");
+
+		//17) Check weather the Meeting is assigned to the contact under Activities Section.
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//table[@class='listView']")));
+		Thread.sleep(2000);
+		if(driver.findElementsByXPath("//table[@class='listView']//a[contains(text(),'"+data[1]+" "+data[2]+"')]").size()>0)
+		{
+			driver.findElementByXPath("//table[@class='listView']//a[contains(text(),'"+data[1]+" "+data[2]+"')]").click();
+			Thread.sleep(1500);
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//table[@class='listView']//a)[7]")));
+			String text = driver.findElementByXPath("(//table[@class='listView']//a)[7]").getText();
+			if(driver.findElementByXPath("(//table[@class='listView']//a)[7]").getText().contains("Project Status"))
+			{
+				System.out.println("Activity check complete. Activity -> "+text);
+			}
+			else
+			{
+				System.out.println("Meeting is not found under Activities");
+			}
+		}
+	}
+	
+	@DataProvider(name = "leadData")
+	public String[][] data()
+	{
+		String[][] leadData = new String[1][12];
+		leadData[0][0]="Mr.";
+		leadData[0][1]="Vinoth";
+		leadData[0][2]="Venugopal";
+		leadData[0][3]="sample@gmail.com";
+		leadData[0][4]="9000000000";
+		leadData[0][5]="Public Relations";
+		leadData[0][6]="Sales";
+		leadData[0][7]="44, Krish Dwaraka, Agananooru St, Metha Nagar, Rajakilpakkam";
+		leadData[0][8]="Chennai";
+		leadData[0][9]="Tamil Nadu";
+		leadData[0][10]="India";
+		leadData[0][11]="600073";
+		return leadData;
+	}
+}
