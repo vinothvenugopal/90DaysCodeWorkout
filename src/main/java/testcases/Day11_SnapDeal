@@ -1,0 +1,171 @@
+package testcases;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.Test;
+
+public class Day11_SnapDeal {
+
+	@Test
+	public void snapDealMethod() throws InterruptedException
+	{
+		System.setProperty("webdriver.chrome.driver", "./newdriver/chromedriver.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+		ChromeDriver driver = new ChromeDriver();
+		System.out.println("Browser Launched");
+		Actions action = new Actions(driver);
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		driver.manage().window().maximize();
+		System.out.println("Browser Maximized");
+
+
+		//1) Go to https://www.snapdeal.com/
+		driver.get("https://www.snapdeal.com/");
+		System.out.println("URL Loaded");
+
+		//2) Mouse over on Toys, Kids' Fashion & more and click on Toys
+		action.moveToElement(driver.findElementByXPath("//span[contains(text(),'Toys, Kids')]")).build().perform();
+		System.out.println("Mouse Hover to Toys, Kids' fashion and More");
+
+		//3) Click Educational Toys in Toys & Games
+		driver.findElementByXPath("//span[contains(text(),'Educational Toys')]").click();
+		System.out.println("Educational Toys clicked");
+
+		//‎4) Click the Customer Rating 4 star and Up 
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//label[@for='avgRating-4.0']")));
+		driver.findElementByXPath("//label[@for='avgRating-4.0']").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='filters-top-selected']//a[text()='4.0']")));
+		if(driver.findElementByXPath("//div[@class='filters-top-selected']//a[text()='4.0']").isDisplayed()==true)
+		{
+			System.out.println("Applied Filter -> customer rating 4 star and Up");
+		}
+		else
+		{
+			System.out.println("Filter Not applied -> customer rating 4 star and Up");
+		}
+
+		//5) Click the offer as 40-50
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//a[contains(text(),'40 - 50')])[1]")));
+		WebElement ele = driver.findElementByXPath("(//a[contains(text(),'40 - 50')])[1]");
+		action.moveToElement(ele).click().build().perform();
+		Thread.sleep(1000);
+		if(driver.findElementByXPath("//div[@class='filters-top-selected']//a[text()='40 - 50']").isDisplayed()==true)
+		{
+			System.out.println("Applied Filter -> 40 to 50%");
+		}
+		else
+		{
+			System.out.println("Filter not applied -> 40 - 50%");
+		}
+
+		//6) Check the availability for the pincode
+		driver.findElementByXPath("//div[@class='pincode-serviceability-check']//input[@class='sd-input']").sendKeys("600073");
+		System.out.println("PinCode Entered");
+		driver.findElementByXPath("//button[text()='Check']").click();
+		System.out.println("Pincode Check button clicked");
+		if(driver.findElementByXPath("//span[text()='Deliver to: ']").isDisplayed()==true)
+		{
+			System.out.println("Delivery to the entered pincode is available");
+		}
+		else
+		{
+			System.out.println("Not servicing area");
+		}
+
+		//7) Click the Quick View of the first product 
+		Thread.sleep(2000);
+		action.moveToElement(driver.findElementByXPath("//picture[@class='picture-elem']")).build().perform();;
+		driver.findElementByXPath("(//div[contains(text(),'Quick View')])[1]").click();
+
+		//8) Click on View Details
+		Thread.sleep(2000);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[contains(text(),'view details')]")));
+		driver.findElementByXPath("//a[contains(text(),'view details')]").click();
+
+		//9) Capture the Price of the Product and Delivery Charge
+		List<Double> price = new ArrayList<Double>();
+		price.add(Double.parseDouble(driver.findElementByXPath("//span[@class='payBlkBig']").getText().trim()));
+		price.add(Double.parseDouble(driver.findElementByXPath("(//div[@id='deliveryOptionsTooltip']//span[@class='availCharges'])[1]").getText().replaceAll("\\D", "")));
+		double totalPrice = price.get(0)+price.get(1);
+		System.out.println("Item Price : "+price.get(0)+'\n'+"Deliver Charge : "+price.get(1)+'\n'+"Total Price : "+totalPrice);
+		driver.findElementByXPath("//span[text()='add to cart']").click();
+
+		//10) Validate the You Pay amount matches the sum of (price+deliver charge)
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='you-pay']//span[@class='price']")));
+		double youPay = Double.parseDouble(driver.findElementByXPath("//div[@class='you-pay']//span[@class='price']").getText().replaceAll("\\D", ""));
+		if(totalPrice == youPay)
+		{
+			System.out.println("You Pay Price: "+youPay);
+			System.out.println("You Pay amount matches with the product price + delivery charges");
+		}
+		else
+		{
+			System.out.println("Total Price: "+totalPrice);
+			System.out.println("You Pay Price: "+youPay);
+			System.out.println("You pay amount doesn't matches with the product price + delivery charges");
+		}
+
+		//11) Search for Sanitizer
+		driver.findElementById("inputValEnter").sendKeys("Sanitizer", Keys.ENTER);
+		System.out.println("Search initiated with Sanitizer");
+
+		//12) Click on Product "BioAyurveda Neem Power Hand Sanitizer"
+		try {
+			wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[text()='BioAyurveda Neem Power  Hand Sanitizer 500 mL Pack of 1']")));
+			driver.findElementByXPath("//p[text()='BioAyurveda Neem Power  Hand Sanitizer 500 mL Pack of 1']").click();
+			System.out.println("BioAyurveda Neem Power  Hand Sanitizer 500 mL Pack of 1 clicked");
+			Set<String> windowHandles = driver.getWindowHandles();
+			List<String>windowHandlesList = new ArrayList<String>(windowHandles);
+			driver.switchTo().window(windowHandlesList.get(1));
+			System.out.println("Control Switched to the new window");
+		} catch (TimeoutException e) {
+			System.out.println("BioAyurveda Neem Power Hand Sanitizer 500mL Pack of 1 is not available."+'\n'+"Exiting execution");
+			System.exit(0);
+		}
+
+		//13) Capture the Price and Delivery Charge
+		price.add(Double.parseDouble(driver.findElementByXPath("//span[@class='payBlkBig']").getText()));
+		System.out.println("Item Price: "+price.get(2));
+		price.add(Double.parseDouble(driver.findElementByXPath("(//span[@class='availCharges'])[2]").getText().replaceAll("\\D", "")));
+		double totalPrice1 = price.get(2)+price.get(3);
+		System.out.println("Delivery Charge: "+price.get(3));
+		System.out.println("Total Price: "+totalPrice1);
+
+		//14) Click on Add to Cart
+		driver.findElementById("add-cart-button-id").click();
+		System.out.println("Add to cart button clicked");
+
+		//15) Click on Cart 
+		Thread.sleep(5000);
+		driver.findElementByXPath("//div[@class='cartInner']/span").click();
+		System.out.println("Cart clicked");
+
+		//16) Validate the Proceed to Pay matches the total amount of both the products
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@type='button']")));
+		double finalPrice = Double.parseDouble(driver.findElementByXPath("//input[@type='button']").getAttribute("value").replaceAll("\\D", ""));
+		System.out.println("Total Cart Price: "+finalPrice);
+		if(finalPrice == (totalPrice+totalPrice1))
+		{
+			System.out.println("Final Payable amount matches with the individual product amount + delivery charges");
+		}
+		else
+		{
+			System.out.println("Final Payable amount doesnt matches with the individual product amount + delivery charges");
+		}
+
+		//17) Close all the windows
+		driver.quit();
+	}
+}
