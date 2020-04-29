@@ -1,0 +1,186 @@
+package testcases;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
+
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.Test;
+
+public class Day10_JustDial {
+
+	String phNo;
+	@Test
+	public void justDialMethod() throws InterruptedException, IOException
+	{
+		System.setProperty("webdriver.chrome.driver", "./newdriver/chromedriver.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+		Map<String, Object> prefs = new HashMap<String, Object>();
+		prefs.put("profile.default_content_setting_values.notifications", 2);
+		ChromeOptions options = new ChromeOptions();
+		options.setExperimentalOption("prefs", prefs);
+		ChromeDriver driver = new ChromeDriver(options);
+		System.out.println("Browser Launched");
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		Actions action = new Actions(driver);
+
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		driver.manage().window().maximize();
+		System.out.println("Browser Maximized");
+		//1) https://www.justdial.com/
+		driver.get("https://www.justdial.com/");
+		System.out.println("URL loaded");
+		
+		//entering the Location
+		driver.findElementById("city").clear();
+		driver.findElementById("city").sendKeys("Chennai");
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("Chennai")));
+		driver.findElementById("Chennai").click();
+		System.out.println("Location set as Chennai");
+		
+		//searching for auto cares in Porur
+		driver.findElementById("srchbx").click();
+		driver.findElementById("cross").click();
+		driver.findElementById("insrch").sendKeys("Porur");
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("Porur")));
+		driver.findElementById("Porur").click();
+		System.out.println("Porur selected");
+		driver.findElementByXPath("//span[text()='Auto care']").click();
+		System.out.println("Auto Care services selected");
+		
+		//clicking car Repair
+		Thread.sleep(1000);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Car Repair']")));
+		driver.findElementByXPath("//span[text()='Car Repair']").click();
+		System.out.println("Car Repair clicked");
+		
+		//clicking Hyundai
+		Thread.sleep(1000);
+		driver.findElementByXPath("(//span[text()='Hyundai'])[1]").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//span[text()='Hyundai Xcent'])[1]")));
+		System.out.println("Hyundai Clicked");
+		
+		//clicking Hyundai xcent
+		Thread.sleep(2000);
+		driver.findElementByXPath("(//span[text()='Hyundai Xcent'])[1]").click();
+		System.out.println("Hyundai Xcent clicked");
+		
+		//navigating to the below url as the url loads upon clicking Hyundai Xcent doesn't shows much results.
+		//So manually navigating to this URL
+		driver.navigate().to("https://www.justdial.com/Chennai/Car-Repair-Services-Hyundai-Xcent-in-Porur");
+
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[@class='newrtings ']//span[@class='green-box']")));
+
+		//to scroll until the last of the page - the elements keeps adding when the page is scrolled
+		//this is to load all the results in this particular page
+		String jsCode = "window.scrollBy(0, document.body.scrollHeight)";
+		js.executeScript(jsCode);
+
+		Thread.sleep(2000);
+		List<WebElement> ratingElementList = driver.findElementsByXPath("//p[@class='newrtings ']//span[@class='green-box']");
+		
+		//LInked Hash Map to which all the data will be stored
+		Map<String, String> nameNo = new LinkedHashMap<String, String>();
+		for (int i = 1; i < ratingElementList.size(); i++) 
+		{
+			//only if there is a star (green box) displayed
+			if(driver.findElementsByXPath("(//p[@class='newrtings ']//span[@class='green-box'])["+i+"]").size()>0)
+			{
+				//getting rating and votes and converting them to double and int respectively
+				Double rating = Double.parseDouble(driver.findElementByXPath("(//p[@class='newrtings ']//span[@class='green-box'])["+i+"]").getText());
+				int votes = Integer.parseInt(driver.findElementByXPath("(//p[@class='newrtings ']//span[@class='rt_count lng_vote'])["+i+"]").getText().replaceAll("\\D", ""));
+				//checking if the rating and votes are >=4.5 and >=50 respectively
+				if(rating >= 4.5 && votes >= 50)
+				{
+					//Storing the service center name that has the rating >=4.5 and votes>=50
+					String scName = driver.findElementByXPath("(//p[@class='newrtings ']//span[@class='green-box'])["+i+"]/ancestor::p/parent::div/h2").getText();
+					List<WebElement> spanNames = driver.findElementsByXPath("(//p[@class='newrtings ']//span[@class='green-box'])["+i+"]/ancestor::p/parent::div//span[contains(@class,'mobilesv icon-')]");
+					List<String> classNames = new ArrayList<String>();
+					//storing all the class names that has the phone number logic
+					for (int j = 0; j < spanNames.size(); j++) 
+					{
+						classNames.add(spanNames.get(j).getAttribute("class"));
+					}
+					phNo="";
+					//calling the  method that gets the phone numbers
+					String phNo = getPhoneNumber(classNames);
+					//adding the service center name and the phone number to the map
+					nameNo.put(scName, phNo);
+				}
+			}
+		}
+		System.out.println("The below are the service centers that has the required rating and votes");
+		for (Map.Entry<String, String> entry : nameNo.entrySet()) 
+		{
+			System.out.println(entry.getKey()+":"+entry.getValue());
+		}
+		//writing the data to the excel sheet.
+		//excel sheet is in the path ./data
+		XSSFWorkbook wbook = new XSSFWorkbook();
+		XSSFSheet wSheet = wbook.createSheet("AutoCare");
+		int initialRow = 0, initialCol=0;
+		for (Entry<String, String> eachEntry : nameNo.entrySet()) 
+		{
+			XSSFRow row = wSheet.createRow(initialRow);
+			XSSFCell colA = row.createCell(initialCol);
+			colA.setCellValue(eachEntry.getKey());
+			
+			XSSFCell colB = row.createCell(initialCol+1);
+			colB.setCellValue(eachEntry.getValue());
+			initialRow++;
+		}
+		File file = new File("./data/AutoCare.xlsx");
+		FileOutputStream fout = new FileOutputStream(file);
+		wbook.write(fout);
+		wbook.close();
+		System.out.println("Data stored in the Excel Sheet");
+		driver.close();
+	}
+
+	//method to derive the phone number
+	public String getPhoneNumber(List<String>classNames)
+	{
+		Map<String, String> phNoDictionary = new LinkedHashMap<String,String>();
+		phNoDictionary.put("mobilesv icon-dc", "+");
+		phNoDictionary.put("mobilesv icon-fe", "(");
+		phNoDictionary.put("mobilesv icon-hg", ")");
+		phNoDictionary.put("mobilesv icon-ba", "-");
+		phNoDictionary.put("mobilesv icon-acb", "0");
+		phNoDictionary.put("mobilesv icon-yz", "1");
+		phNoDictionary.put("mobilesv icon-wx", "2");
+		phNoDictionary.put("mobilesv icon-vu", "3");
+		phNoDictionary.put("mobilesv icon-ts", "4");
+		phNoDictionary.put("mobilesv icon-rq", "5");
+		phNoDictionary.put("mobilesv icon-po", "6");
+		phNoDictionary.put("mobilesv icon-nm", "7");
+		phNoDictionary.put("mobilesv icon-lk", "8");
+		phNoDictionary.put("mobilesv icon-ji", "9");	
+
+		for (int i = 0; i < classNames.size(); i++) 
+		{
+			phNo=phNo+phNoDictionary.get(classNames.get(i));
+		}
+		phNo.replaceAll(" ", "");
+		return phNo;
+	}
+}
