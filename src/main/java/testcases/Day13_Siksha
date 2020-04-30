@@ -1,0 +1,148 @@
+package testcases;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.Test;
+
+public class Day13_Siksha {
+
+	@Test
+	public void sikshaCollegeSelect() throws InterruptedException
+	{
+		System.setProperty("webdriver.chrome.driver", "./newdriver/chromedriver.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+		ChromeDriver driver = new ChromeDriver();
+		Actions action = new Actions(driver);
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		System.out.println("Browser Launched");
+		driver.manage().window().maximize();
+		System.out.println("Browser Maximized");
+
+		//1) Go to https://studyabroad.shiksha.com/
+		driver.get("https://studyabroad.shiksha.com");
+		System.out.println("URL Loaded");
+
+		//2) Mouse over on Colleges and click MS in Computer Science &Engg under MS Colleges
+		action.moveToElement(driver.findElementByXPath("//div[@class='lgn-section']//label[text()='Colleges ']")).build().perform();
+		System.out.println("Mouse Hover to Colleges");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='MS in Computer Science &Engg']")));
+		driver.findElementByXPath("//a[text()='MS in Computer Science &Engg']").click();
+		System.out.println("MS in Computer Science &Engg clicked");
+
+		//3) Select GRE under Exam Accepted and Score 300 & Below 
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[text()='GRE']")));
+		driver.findElementByXPath("//p[text()='GRE']").click();
+		System.out.println("GRE clicked");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[text()='GRE']/parent::label/following-sibling::div/select")));
+		WebElement scoreElement = driver.findElementByXPath("//p[text()='GRE']/parent::label/following-sibling::div/select");
+		Select scoreDD = new Select(scoreElement);
+		scoreDD.selectByVisibleText("300 & below");
+		System.out.println("300 & below selected");
+
+		//4) Max 10 Lakhs under 1st year Total fees, USA under countries
+		Thread.sleep(1000);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[text()='Max 10 Lakhs']")));
+		driver.findElementByXPath("//p[text()='Max 10 Lakhs']").click();
+		System.out.println("Max 10 Lakhs selected");
+		WebElement ele = driver.findElementByXPath("//a[text()='USA']/ancestor::label/span");
+		js.executeScript("arguments[0].click()", ele);
+		System.out.println("USA selected");
+
+		//5) Select Sort By: Low to high 1st year total fees
+		Thread.sleep(1000);
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("categorySorter")));
+		WebElement sortElement = driver.findElementById("categorySorter");
+		Select sortDD = new Select(sortElement);
+		sortDD.selectByValue("fees_ASC");
+		System.out.println("Results sorted by Low to high 1st year total fees");
+
+		//6) Click Add to compare of the College having least fees with Public University, Scholarship and Accomadation
+		List<WebElement> listOfColleges = driver.findElementsByXPath("(//div[contains(@id,'categoryPageListing_tupleId')])");
+		for (int i = 1; i <= listOfColleges.size(); i++) 
+		{
+			Thread.sleep(500);
+			//check if there are 3 ✔ available and if yes, add that particular college to compare
+			if(driver.findElementsByXPath("(//div[contains(@id,'categoryPageListing_tupleId')])["+i+"]//span[@class='tick-mark']").size()==3)
+			{
+				Thread.sleep(1000);
+				driver.findElementByXPath("(//div[contains(@id,'categoryPageListing_tupleId')])["+i+"]//p[text()='Add to compare']").click();
+				break;
+			}
+		}
+
+		//7) Select the first college under Compare with similar colleges 
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//li[@id='compareLayerRecommendations']//a)[1]")));
+		ele = driver.findElementByXPath("(//li[@id='compareLayerRecommendations']//a)[1]");
+		js.executeScript("arguments[0].click()",ele);
+		System.out.println("First college under Compare with similar colleges clicked");
+
+		//8) Click on Compare College>
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='compare-col flLt']//strong")));
+		driver.findElementByXPath("//div[@class='compare-col flLt']//strong").click();
+		System.out.println("Compare Colleges button clicked");
+
+		//9) Select When to Study as 2021
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='signUp-child-wrap']//strong[text()='2021']")));
+		driver.findElementByXPath("//div[@class='signUp-child-wrap']//strong[text()='2021']").click();
+		System.out.println("2021 selected");
+
+		//10) Select Preferred Countries as USA
+		ele = driver.findElementByXPath("//div[text()='Preferred Countries']");
+		js.executeScript("arguments[0].click()", ele);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='city-lr ctry-lr']//label[text()[normalize-space()='USA']]")));
+		driver.findElementByXPath("//div[@class='city-lr ctry-lr']//label[text()[normalize-space()='USA']]").click();
+		driver.findElementByXPath("//a[text()='ok']").click();
+		System.out.println("Preferred country USA selected");
+
+		//11) Select Level of Study as Masters
+		driver.findElementByXPath("//div[@class='signUp-child-wrap ']//strong[text()='Masters']").click();
+		System.out.println("Masters selected");
+
+		//12) Select Preferred Course as MS
+		driver.findElementByXPath("//div[@class='sp-frm selectField signup-fld invalid']").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//li[text()='MS']")));
+		driver.findElementByXPath("//li[text()='MS']").click();
+		System.out.println("MS selected");
+
+		//13) Select Specialization as "Computer Science & Engineering"
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='sp-frm selectField signup-fld invalid  filled']")));
+		driver.findElementByXPath("//div[@class='sp-frm selectField signup-fld invalid  filled']").click();
+		driver.findElementByXPath("//li[text()='Computer Science & Engineering']").click();
+		System.out.println("Computer Science & Engineering selected");
+
+		//14) Click on Sign Up
+		driver.findElementById("signup").click();
+		System.out.println("SignUp button clicked");
+
+		//15) Print all the warning messages displayed on the screen for missed mandatory fields 
+		System.out.println("Below are the error messages displayed for not entering the mandatory values");
+		List<String> errorMessageText = new ArrayList<String>();
+		if(driver.findElementsByXPath("//div[@class='input-helper']//div[contains(text(),'Please')]").size()>0)
+		{
+			List<WebElement> errorMessagesElement = driver.findElementsByXPath("//div[@class='input-helper']//div[contains(text(),'Please')]");
+
+			for (WebElement errorMessage : errorMessagesElement) 
+			{
+				errorMessageText.add(errorMessage.getText());
+			}
+		}
+		for (int i = 0; i < errorMessageText.size(); i++) 
+		{
+			if(errorMessageText.get(i).length()>0)
+			{
+				System.out.println(errorMessageText.get(i));
+			}
+		}
+		driver.close();
+	}
+}
