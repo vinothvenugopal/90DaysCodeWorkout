@@ -1,6 +1,7 @@
 package testcases;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -46,17 +47,33 @@ public class Day13_Siksha {
 		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[text()='GRE']/parent::label/following-sibling::div/select")));
 		WebElement scoreElement = driver.findElementByXPath("//p[text()='GRE']/parent::label/following-sibling::div/select");
 		Select scoreDD = new Select(scoreElement);
-		scoreDD.selectByVisibleText("300 & below");
-		System.out.println("300 & below selected");
+		scoreDD.selectByVisibleText("284 & below");
+		System.out.println("284 & below selected");
 
 		//4) Max 10 Lakhs under 1st year Total fees, USA under countries
 		Thread.sleep(1000);
 		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//p[text()='Max 10 Lakhs']")));
 		driver.findElementByXPath("//p[text()='Max 10 Lakhs']").click();
 		System.out.println("Max 10 Lakhs selected");
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='USA']/ancestor::label/span")));
 		WebElement ele = driver.findElementByXPath("//a[text()='USA']/ancestor::label/span");
 		js.executeScript("arguments[0].click()", ele);
 		System.out.println("USA selected");
+		//verifying if the filters are applied correct
+		Thread.sleep(500);
+		if(driver.findElementByXPath("//div[@class='selection-list']//p[1]").getText().contains("GRE (284 and below) "))
+		{
+			System.out.println("Filter Applied -> GRE, 284 and below");
+		}
+		if(driver.findElementByXPath("//div[@class='selection-list']//p[3]").getText().contains("Max 10 Lacs"))
+		{
+			System.out.println("Filter Applied -> Max 10 Lacs");
+		}
+		if(driver.findElementByXPath("//div[@class='selection-list']//p[4]").getText().contains("USA"))
+		{
+			System.out.println("Filter Applied -> USA");
+		}
+
 
 		//5) Select Sort By: Low to high 1st year total fees
 		Thread.sleep(1000);
@@ -68,17 +85,22 @@ public class Day13_Siksha {
 
 		//6) Click Add to compare of the College having least fees with Public University, Scholarship and Accomadation
 		List<WebElement> listOfColleges = driver.findElementsByXPath("(//div[contains(@id,'categoryPageListing_tupleId')])");
+		List<Double> totalFee = new ArrayList<Double>();
 		for (int i = 1; i <= listOfColleges.size(); i++) 
 		{
 			Thread.sleep(500);
 			//check if there are 3 ✔ available and if yes, add that particular college to compare
 			if(driver.findElementsByXPath("(//div[contains(@id,'categoryPageListing_tupleId')])["+i+"]//span[@class='tick-mark']").size()==3)
 			{
-				Thread.sleep(1000);
-				driver.findElementByXPath("(//div[contains(@id,'categoryPageListing_tupleId')])["+i+"]//p[text()='Add to compare']").click();
-				break;
+				//add the fee of the colleges that has 3  ✔
+				totalFee.add(Double.parseDouble(driver.findElementByXPath("(//div[@class='detail-col flLt']/p[contains(text(),'Rs')])["+i+"]").getText().replaceAll("[^0-9\\s.]+|\\.(?!\\d)", "")));
 			}
 		}
+		Thread.sleep(500);
+		//sort the fee
+		Collections.sort(totalFee);
+		//selecting the college that has the less fee -> adding to compare
+		driver.findElementByXPath("(//div[@class='detail-col flLt'])/p[contains(text(),'"+totalFee.get(0)+"')]/ancestor::div[@class='clearwidth']/following-sibling::div[@class='compare-box flRt customInputs']//span").click();
 
 		//7) Select the first college under Compare with similar colleges 
 		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//li[@id='compareLayerRecommendations']//a)[1]")));
@@ -126,23 +148,21 @@ public class Day13_Siksha {
 
 		//15) Print all the warning messages displayed on the screen for missed mandatory fields 
 		System.out.println("Below are the error messages displayed for not entering the mandatory values");
-		List<String> errorMessageText = new ArrayList<String>();
 		if(driver.findElementsByXPath("//div[@class='input-helper']//div[contains(text(),'Please')]").size()>0)
 		{
 			List<WebElement> errorMessagesElement = driver.findElementsByXPath("//div[@class='input-helper']//div[contains(text(),'Please')]");
 
 			for (WebElement errorMessage : errorMessagesElement) 
 			{
-				errorMessageText.add(errorMessage.getText());
+				{
+					if(errorMessage.getText().length()>0) 
+					{
+						System.out.println(errorMessage.getText());
+					}
+				}
 			}
 		}
-		for (int i = 0; i < errorMessageText.size(); i++) 
-		{
-			if(errorMessageText.get(i).length()>0)
-			{
-				System.out.println(errorMessageText.get(i));
-			}
-		}
+
 		driver.close();
 	}
 }
