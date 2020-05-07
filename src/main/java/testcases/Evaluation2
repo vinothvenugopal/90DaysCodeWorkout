@@ -101,6 +101,9 @@ public class Evaluation2 {
 		}
 		//			14) Navigate to Example Scenarios and Select CI/CD for Containers
 		action.moveToElement(driver.findElementByXPath("//a[text()='Example Scenarios']")).click().build().perform();
+		System.out.println("Example Scenarios Clicked");
+		driver.findElementByXPath("//span[text()='CI/CD for Containers']").click();
+		System.out.println("CI/CD for containers clicked");
 		if(driver.findElementsByXPath("(//div[@class='lp_close-icon lp_icon-white'])[2]").size()>0)
 		{
 			driver.findElementByXPath("(//div[@class='lp_close-icon lp_icon-white'])[2]").click();
