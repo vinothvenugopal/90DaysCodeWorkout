@@ -1,0 +1,163 @@
+package testcases;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.annotations.Test;
+
+public class Day14_Zalando {
+
+	@Test
+	public void zalandoTC() throws InterruptedException
+	{
+		System.setProperty("webdriver.chrome.driver", "./newdriver/chromedriver.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+		ChromeDriver driver = new ChromeDriver();
+		System.out.println("Browser Launched");
+		Actions action = new Actions(driver);
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		WebDriverWait wait = new WebDriverWait(driver,30);
+		driver.manage().window().maximize();
+		System.out.println("Browser Maximized");
+		
+		//1) Go to https://www.zalando.com/
+		driver.get("https://www.zalando.com");
+		System.out.println("URL Loaded");
+		
+		//2) Get the Alert text and print it
+		Alert alert = driver.switchTo().alert();
+		System.out.println("Alert Text is: "+alert.getText());
+		
+		//3) Close the Alert box and click on Zalando.uk
+		alert.accept();
+		driver.findElementByXPath("//a[text()='Zalando.uk']").click();
+		System.out.println("Zalando UK clicked");
+		
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("uc-btn-accept-banner")));
+		driver.findElementById("uc-btn-accept-banner").click();
+		
+		//4) Click Women--> Clothing and click Coat 
+		driver.findElementByXPath("//div[@class='z-navicat-header_navSectionContainer']//span[text()='Women']").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Clothing']")));
+		action.moveToElement(driver.findElementByXPath("//span[text()='Clothing']")).build().perform();
+		driver.findElementByXPath("//span[text()='Coats']").click();
+		
+		//5) Choose Material as cotton (100%) and Length as thigh-length
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Material']")));
+		driver.findElementByXPath("//span[text()='Material']").click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='cotton (100%)']")));
+		driver.findElementByXPath("//span[text()='cotton (100%)']").click();
+		Thread.sleep(500);
+		driver.findElementByXPath("//button[text()='Save']").click();
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Length']")));
+		driver.findElementByXPath("//span[text()='Length']").click();
+		Thread.sleep(500);
+		driver.findElementByXPath("//span[text()='thigh-length']").click();
+		Thread.sleep(500);
+		driver.findElementByXPath("//button[text()='Save']").click();
+		
+		//6) Click on Q/S designed by MANTEL - Parka coat
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Q/S designed by']")));
+		driver.findElementByXPath("//div[text()='Q/S designed by']").click();
+		
+		//7) Check the availability for Color as Olive and Size as 'M'
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//div[@class='kbIUYt qR080i']//img[@alt='olive']")));
+		driver.findElementByXPath("//div[@class='kbIUYt qR080i']//img[@alt='olive']").click();
+		Thread.sleep(500);
+		if(driver.findElementByXPath("//div[@class='Wqd6Qu']//span[2]").getText().equals("olive"))
+		{
+			System.out.println("Olive variant is selected");
+		}
+		else
+		{
+			System.out.println("Olive variant is not selected");
+		}
+		driver.findElementById("picker-trigger").click();
+		driver.findElementByXPath("//span[text()='M']").click();
+		
+		//8) If the previous preference is not available, check  availability for Color Navy and Size 'M'
+		if(driver.findElementsByXPath("//div[@class='Wqd6Qu']//h2").size()>0)
+		{
+			System.out.println("Olive Variant is "+driver.findElementByXPath("//div[@class='Wqd6Qu']//h2").getText());
+		}
+		driver.findElementByXPath("//div[@class='kbIUYt qR080i']//img[@alt='navy']").click();
+		Thread.sleep(500);
+		if(driver.findElementByXPath("//div[@class='Wqd6Qu']//span[2]").getText().equals("navy"))
+		{
+			System.out.println("Navy variant is selected");
+		}
+		else
+		{
+			System.out.println("Navy variant is not selected");
+		}
+		
+		driver.findElementById("picker-trigger").click();
+		driver.findElementByXPath("//span[text()='M']").click();
+		if(driver.findElementsByXPath("//div[@class='Wqd6Qu']//h2").size()>0)
+		{
+			System.out.println(driver.findElementByXPath("//div[@class='Wqd6Qu']//h2").getText());
+		}
+		else
+		{
+			System.out.println("Navy variant is available in size M");
+		}
+		
+		//9) Add to bag only if Standard Delivery is free
+		if(driver.findElementByXPath("(//span[@class='AtOZbZ'])[2]").getText().equalsIgnoreCase("free"))
+		{
+			System.out.println("Free Delivery");
+			driver.findElementByXPath("//span[text()='Add to bag']").click();
+		}
+		else
+		{
+			System.out.println("Its not delivered for free. Exiting");
+			System.exit(0);
+		}
+		
+		//10) Mouse over on Your Bag and Click on "Go to Bag"
+		driver.findElementByXPath("//span[text()='Your bag']").click();
+		
+		//11) Capture the Estimated Deliver Date and print
+		System.out.println("Delivery estimation is: "+driver.findElementByXPath("//div[@data-id='delivery-estimation']//span").getText());
+		action.moveToElement(driver.findElementByXPath("//a[text()='Free delivery & returns*']")).build().perform();
+		System.out.println(driver.findElementByXPath("(//div[@class='z-navicat-header-uspBar_message']//span)[2]").getText());
+		
+		//12) Mouse over on FREE DELIVERY & RETURNS*, get the tool tip text and print
+		action.moveToElement(driver.findElementByXPath("//a[text()='Free delivery & returns*']")).click().build().perform();
+		Thread.sleep(1000);
+		
+		//13) Click on Start chat in the Start chat and go to the new window
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Start chat']")));
+		driver.findElementByXPath("//span[text()='Start chat']").click();
+		Set<String> windowHandlesSet = driver.getWindowHandles();
+		List<String> windowHandlesList = new ArrayList<String>(windowHandlesSet);
+		driver.switchTo().window(windowHandlesList.get(1));
+		
+		//14) Enter you first name and a dummy email and click Start Chat
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("prechat_customer_name_id")));
+		driver.findElementById("prechat_customer_name_id").sendKeys("Vinoth");
+		driver.findElementById("prechat_customer_email_id").sendKeys("sample@sample.com");
+		driver.findElementById("prechat_submit").click();
+		
+		//15) Type Hi, click Send and print thr reply message and close the chat window.
+		wait.until(ExpectedConditions.elementToBeClickable(By.id("liveAgentChatTextArea")));
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("(//div[@id='liveAgentChatLogText']/span)[2]")));
+		driver.findElementById("liveAgentChatTextArea").sendKeys("Hi");
+		driver.findElementByXPath("//button[text()='Send']").click();
+		Thread.sleep(500);
+		List<WebElement> chatLog = driver.findElementsByXPath("//div[@id='liveAgentChatLogText']/span");
+		System.out.println(driver.findElementByXPath("(//div[@id='liveAgentChatLogText']/span)["+(chatLog.size())+"]").getText());
+		driver.quit();
+	}
+}
