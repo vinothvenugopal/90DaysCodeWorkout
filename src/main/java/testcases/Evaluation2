@@ -111,7 +111,8 @@ public class Evaluation2 {
 
 		//			15) Click Add to Estimate
 		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[text()='Add to estimate']")));
-		action.moveToElement(driver.findElementByXPath("//button[text()='Add to estimate']")).click().build().perform();;
+		WebElement ele = driver.findElementByXPath("//button[text()='Add to estimate']");
+		js.executeScript("arguments[0].click()", ele);
 		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Estimate added!']")));
 		System.out.println("Estimate Added!");
 
