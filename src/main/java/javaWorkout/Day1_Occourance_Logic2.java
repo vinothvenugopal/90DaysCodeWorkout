@@ -22,7 +22,7 @@ public class Day1_Occourance_Logic2 {
 			}
 		}
 
-		System.out.println("Occurance of o in the given input String is "+count.get('Y'));
+		System.out.println("Occurance of o in the given input String is "+count.get('o'));
 		}
 	}
 
